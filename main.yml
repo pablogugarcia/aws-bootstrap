@@ -6,10 +6,11 @@ Parameters:
   EC2AMI:
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
     Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+
 Resources:
 
   SecurityGroup:
-    Type: AWS::EC2::SecurityGroup
+    Type: "AWS::EC2::SecurityGroup"
     Properties:
       GroupDescription: !Sub 'Internal Security group for ${AWS::StackName}'
       SecurityGroupIngress:
@@ -96,9 +97,9 @@ Resources:
             nvm use v12.7.0
 
             # Download latest code, unzip it into /home/ec2-user/app
-            wget https://github.com/pablogugarcia/aws-bootstrap/archive/master.zip 
+            wget https://github.com/pablogugarcia/aws-bootstrap2/archive/master.zip 
             unzip master.zip
-            mv aws-bootstrap-master app
+            mv aws-bootstrap2-master app
 
             # Create log directory
             mkdir -p /home/ec2-user/app/logs
@@ -114,6 +115,14 @@ Resources:
 
           # Signal to CloudFormation that the instance is ready
           /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --region ${AWS::Region} --resource Instance 
+          
       Tags:
         - Key: Name
           Value: !Ref AWS::StackName
+
+Outputs:
+  InstanceEndpoint:
+    Description: The DNS name for the created instance
+    Value: !Sub "http://${Instance.PublicDnsName}:8080" 
+    Export:
+      Name: InstanceEndpoint
